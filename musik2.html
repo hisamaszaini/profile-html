@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="description" content="Download lagu MP3 favorit Anda dengan cepat dan mudah">
+    <meta name="theme-color" content="#0ea5e9">
+    <title>MP3Juice - Modern Music Download Platform</title>
+    <link rel="manifest" href="#manifest-placeholder" id="manifest-placeholder">
+    <link rel="apple-touch-icon" href="https://picsum.photos/192/192">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <script>
+        const manifestContent = {
+            "name": "MP3Juice Music Downloader",
+            "short_name": "MP3Juice",
+            "description": "Download lagu MP3 favorit Anda dengan cepat dan mudah",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#0ea5e9",
+            "icons": [
+                {
+                    "src": "https://picsum.photos/192/192",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                },
+                {
+                    "src": "https://picsum.photos/512/512",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+
+        // Create Blob and set as manifest href
+        const manifestBlob = new Blob([JSON.stringify(manifestContent)], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('manifest-placeholder').href = manifestURL;
+        });
+
+        // Tailwind configuration
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            },
+            darkMode: 'class',
+        }
+    </script>
+    <script>
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Create service worker content
+                const swContent = `
+          const CACHE_NAME = 'mp3juice-cache-v1';
+          const urlsToCache = [
+            '/',
+            '/index.html',
+            'https://picsum.photos/192/192',
+            'https://picsum.photos/512/512',
+            'https://picsum.photos/400/320',
+            'https://cdn.tailwindcss.com',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+          ];
+
+          // Install event - cache assets
+          self.addEventListener('install', event => {
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then(cache => {
+                  console.log('Opened cache');
+                  return cache.addAll(urlsToCache);
+                })
+            );
+          });
+
+          // Fetch event - serve from cache if available
+          self.addEventListener('fetch', event => {
+            event.respondWith(
+              caches.match(event.request)
+                .then(response => {
+                  // Return cached response if found
+                  if (response) {
+                    return response;
+                  }
+                  
+                  // Clone the request as it can only be used once
+                  const fetchRequest = event.request.clone();
+                  
+                  return fetch(fetchRequest).then(
+                    response => {
+                      // Don't cache if not a valid response
+                      if(!response || response.status !== 200 || response.type !== 'basic') {
+                        return response;
+                      }
+                      
+                      // Clone the response as it can only be used once
+                      const responseToCache = response.clone();
+                      
+                      caches.open(CACHE_NAME)
+                        .then(cache => {
+                          cache.put(event.request, responseToCache);
+                        });
+                        
+                      return response;
+                    }
+                  );
+                })
+            );
+          });
+
+          // Activate event - clean up old caches
+          self.addEventListener('activate', event => {
+            const cacheWhitelist = [CACHE_NAME];
+            event.waitUntil(
+              caches.keys().then(cacheNames => {
+                return Promise.all(
+                  cacheNames.map(cacheName => {
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                      return caches.delete(cacheName);
+                    }
+                  })
+                );
+              })
+            );
+          });
+        `;
+
+                // Create service worker blob and register it
+                const swBlob = new Blob([swContent], { type: 'text/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+
+                navigator.serviceWorker.register(swURL)
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }).catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+
+        // Dark mode toggle script
+        function toggleDarkMode() {
+            const htmlElement = document.documentElement;
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                document.getElementById('darkModeIcon').classList.remove('hidden');
+                document.getElementById('lightModeIcon').classList.add('hidden');
+            } else {
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                document.getElementById('darkModeIcon').classList.add('hidden');
+                document.getElementById('lightModeIcon').classList.remove('hidden');
+            }
+        }
+
+        // Set the initial theme based on local storage
+        document.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeIcon').classList.add('hidden');
+                document.getElementById('lightModeIcon').classList.remove('hidden');
+            } else {
+                document.getElementById('darkModeIcon').classList.remove('hidden');
+                document.getElementById('lightModeIcon').classList.add('hidden');
+            }
+
+            // Initialize audio visualizer
+            initVisualizer();
+
+            // Show install prompt if applicable
+            initInstallPrompt();
+        });
+
+        // Toggle mobile menu
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+
+        function initInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent Chrome 67 and earlier from automatically showing the prompt
+                e.preventDefault();
+                // Stash the event so it can be triggered later
+                deferredPrompt = e;
+                // Update UI to notify the user they can add to home screen
+                const installButton = document.getElementById('install-button');
+                if (installButton) {
+                    installButton.classList.remove('hidden');
+                }
+            });
+
+            // Installation was successful
+            window.addEventListener('appinstalled', (evt) => {
+                // Log install to analytics
+                console.log('MP3Juice PWA was installed');
+                // Hide install prompt
+                const installButton = document.getElementById('install-button');
+                if (installButton) {
+                    installButton.classList.add('hidden');
+                }
+            });
+        }
+
+        function installPWA() {
+            if (deferredPrompt) {
+                // Show the prompt
+                deferredPrompt.prompt();
+
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        function initVisualizer() {
+            const canvas = document.getElementById('visualizer');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const barCount = 60;
+            const barWidth = canvas.width / barCount;
+            const barMargin = 2;
+            const bars = new Array(barCount).fill(0); // simpan tinggi sebelumnya
+
+            function drawVisualizer() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < barCount; i++) {
+                    const targetHeight = Math.random() * canvas.height * 0.8;
+                    // transisi perlahan ke nilai baru
+                    bars[i] += (targetHeight - bars[i]) * 0.1; // angka 0.1 bisa diubah untuk kecepatan transisi
+
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+
+                    if (isDark) {
+                        gradient.addColorStop(0, '#0ea5e9');
+                        gradient.addColorStop(1, '#0369a1');
+                    } else {
+                        gradient.addColorStop(0, '#38bdf8');
+                        gradient.addColorStop(1, '#0ea5e9');
+                    }
+
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(i * (barWidth + barMargin), canvas.height - bars[i], barWidth, bars[i]);
+                }
+
+                requestAnimationFrame(drawVisualizer);
+            }
+
+            drawVisualizer();
+        }
+
+        // Show download button on search
+        // function showDownloadOptions() {
+        //     const input = document.getElementById('search-input');
+        //     const results = document.getElementById('search-results');
+
+        //     if (input.value.trim() !== '') {
+        //         results.classList.remove('hidden');
+        //     } else {
+        //         results.classList.add('hidden');
+        //     }
+        // }
+
+        // Network status check and notification
+        function setupNetworkStatusMonitor() {
+            const networkStatus = document.getElementById('network-status');
+
+            function updateNetworkStatus() {
+                if (navigator.onLine) {
+                    if (networkStatus) {
+                        networkStatus.classList.add('hidden');
+                    }
+                } else {
+                    if (networkStatus) {
+                        networkStatus.classList.remove('hidden');
+                    }
+                }
+            }
+
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+
+            // Initial check
+            updateNetworkStatus();
+        }
+
+        // Setup data caching for offline playlists
+        function setupDataCache() {
+            // This would be implemented with IndexedDB in a real application
+            // Simplified version for this example
+            const localSongs = [
+                { title: "Popular Song Title", artist: "Artist Name" },
+                { title: "Another Hit Song", artist: "Famous Artist" },
+                { title: "Top Chart Music", artist: "Popular Band" },
+                { title: "Latest Trending Song", artist: "New Artist" }
+            ];
+
+            // Store to localStorage as a simple cache
+            localStorage.setItem('cachedSongs', JSON.stringify(localSongs));
+        }
+
+        // Initialize all PWA features
+        window.addEventListener('load', () => {
+            setupNetworkStatusMonitor();
+            setupDataCache();
+        });
+    </script>
+</head>
+
+<body
+    class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col">
+    <div id="network-status" class="hidden bg-yellow-500 text-white p-2 text-center">
+        <i class="fas fa-wifi mr-2"></i> Anda sedang dalam mode offline. Beberapa fitur mungkin tidak tersedia.
+    </div>
+    <div id="install-button" class="hidden bg-primary-600 text-white p-3 text-center cursor-pointer"
+        onclick="installPWA()">
+        <i class="fas fa-download mr-2"></i> Instal MP3Juice di perangkat Anda untuk akses lebih cepat
+    </div>
+
+    <!-- Header -->
+    <header
+        class="sticky top-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <button
+                        class="p-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 md:hidden transition hover:bg-gray-200 dark:hover:bg-gray-700"
+                        onclick="toggleMenu()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-music text-primary-600 dark:text-primary-400 text-2xl"></i>
+                        <span
+                            class="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-blue-600 dark:from-primary-400 dark:to-blue-500">MP3Juice</span>
+                    </a>
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a class="hover:text-primary-600 dark:hover:text-primary-400 transition font-semibold"
+                        href="#">Beranda</a>
+                    <a class="hover:text-primary-600 dark:hover:text-primary-400 transition font-semibold"
+                        href="#">Trending</a>
+                    <a class="hover:text-primary-600 dark:hover:text-primary-400 transition font-semibold"
+                        href="#">Koleksi</a>
+                    <a class="hover:text-primary-600 dark:hover:text-primary-400 transition font-semibold"
+                        href="#">FAQ</a>
+                </nav>
+
+                <div class="flex items-center space-x-4">
+                    <!-- <div class="relative">
+                        <select
+                            class="appearance-none bg-transparent pr-8 pl-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400">
+                            <option>Bahasa Indonesia</option>
+                            <option>English</option>
+                        </select>
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div> -->
+
+                    <button class="text-gray-800 dark:text-gray-200 transition" onclick="toggleDarkMode()">
+                        <i id="darkModeIcon" class="fas fa-moon"></i>
+                        <i id="lightModeIcon" class="fas fa-sun hidden"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu (Hidden by default) -->
+    <div class="md:hidden">
+        <nav id="mobile-menu"
+            class="hidden bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-md">
+            <div class="container mx-auto px-4 py-2">
+                <div class="flex flex-col space-y-3 py-3">
+                    <a class="px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                        href="#">Beranda</a>
+                    <a class="px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                        href="#">Trending</a>
+                    <a class="px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                        href="#">Koleksi</a>
+                    <a class="px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                        href="#">FAQ</a>
+                    <a class="px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                        href="#">DMCA</a>
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                        <button onclick="installPWA()"
+                            class="w-full px-2 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-md transition flex items-center justify-center">
+                            <i class="fas fa-download mr-2"></i> Instal Aplikasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="flex flex-col items-center justify-center my-12">
+            <div class="w-full max-w-2xl text-center">
+                <h1
+                    class="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-blue-600 dark:from-primary-400 dark:to-blue-500">
+                    Unduh Musik Favorit Anda
+                </h1>
+                <p class="text-gray-600 dark:text-gray-300 mb-8">
+                    MP3Juice adalah platform pengunduhan musik gratis terbaik dengan kualitas audio terbaik tahun 2025
+                </p>
+            </div>
+
+            <div class="w-full max-w-md h-28 mb-6">
+                <canvas id="visualizer" class="w-full h-full rounded-xl"></canvas>
+            </div>
+
+            <!-- Search Box -->
+            <div class="w-full max-w-2xl">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input id="search-input"
+                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 shadow-sm"
+                        placeholder="Cari lagu atau tempel URL YouTube..." type="text" />
+                    <button id="search-button"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white px-4 py-1.5 rounded-lg text-sm transition">
+                        <i class="fas fa-search mr-1"></i> Cari
+                    </button>
+                </div>
+
+                <!-- Search Results (Hidden by default) -->
+                <div id="search-results"
+                    class="hidden mt-4 bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
+                                <i class="fas fa-music text-gray-500 dark:text-gray-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium">Contoh Hasil Pencarian</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Artist - 3:45</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button
+                                class="p-2 rounded-md bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button
+                                class="p-2 rounded-md bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white transition">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 text-center">
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-2">Pilih Kualitas Audio</p>
+                        <div class="flex justify-center space-x-2">
+                            <button
+                                class="px-3 py-1.5 rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-sm transition">128
+                                kbps</button>
+                            <button
+                                class="px-3 py-1.5 rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-sm transition">256
+                                kbps</button>
+                            <button
+                                class="px-3 py-1.5 rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-sm transition">320
+                                kbps</button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    Dengan menekan tombol Cari, Anda menyetujui <a href="#"
+                        class="text-primary-600 dark:text-primary-400 hover:underline">Ketentuan Penggunaan</a> kami.
+                </p>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="w-full max-w-3xl mx-auto">
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 mb-4">
+                        <i class="fas fa-bolt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Cepat & Mudah</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Unduh lagu favorit Anda dalam hitungan detik tanpa
+                        registrasi atau instalasi perangkat lunak.</p>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 mb-4">
+                        <i class="fas fa-headphones text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Kualitas Premium</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Nikmati lagu berkualitas tinggi hingga 320kbps untuk
+                        pengalaman mendengar yang optimal.</p>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 mb-4">
+                        <i class="fas fa-mobile-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Mode Offline</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Akses MP3Juice bahkan saat offline dan putar koleksi
+                        musik
+                        yang telah diunduh sebelumnya.</p>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="mt-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 max-w-3xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8">
+                    <h2 class="text-2xl font-bold mb-4">MP3Juice Sekarang Tersedia Offline</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4 text-justify">
+                        Instal MP3Juice sebagai aplikasi di perangkat Anda dan nikmati semua fitur bahkan saat tidak ada
+                        koneksi internet. Lagu yang sudah diunduh dapat diputar kapan saja.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                        <button onclick="installPWA()"
+                            class="flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white py-3 px-6 rounded-lg shadow-sm transition">
+                            <i class="fas fa-download mr-2"></i> Instal Aplikasi
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <div class="w-64 h-64 bg-primary-100 dark:bg-gray-700 rounded-3xl overflow-hidden shadow-lg">
+                            <img src="https://picsum.photos/400/320" alt="Mobile app"
+                                class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-primary-600/90 text-white flex items-center justify-center">
+                                    <i class="fas fa-arrow-down text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="absolute -bottom-3 -right-3 bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center space-x-1">
+                                <i class="fas fa-mobile-alt text-primary-600 dark:text-primary-400"></i>
+                                <span class="font-bold text-sm">PWA Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <article
+            class="mt-8 mx-auto max-w-3xl bg-white dark:bg-gray-800 p-8 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-bold mb-6 text-center">MP3Juices - MP3 Juice Download Lagu Mp3 Terbaik 2025</h2>
+
+            <div class="prose dark:prose-invert prose-blue max-w-none">
+                <p>
+                    <strong>Mp3Juices</strong> adalah situs gratis yang populer untuk mengunduh musik mp3. Mp3Juices
+                    juga menawarkan mesin pencari yang memungkinkan Anda mencari file audio MP3 di seluruh Internet.
+                    Anda dapat mengunduh lagu favorit Anda sebagai musik mp3, atau video, dengan memasukkan permintaan
+                    pencarian Anda di bidang pencarian Jus Mp3. Internet kemudian akan mencari file audio MP3. Daftar
+                    hasil lagu atau video mp3 Anda akan muncul jika ada yang cocok dengan permintaan pencarian Anda.
+                    Sesederhana itu.
+                </p>
+
+                <p>
+                    Anda juga dapat menyalin url dan menempelkannya ke kotak pencarian dan mengklik tombol pencarian.
+                    konversi dimulai dan dalam beberapa detik, file audio yang dapat diunduh siap untuk diunduh.
+                    Pengunduh Mp3Juice ini menawarkan unduhan mp3 Musik mp3 Berkualitas Tinggi secara gratis. Hal-hal
+                    terbaik dari Pengunduh Mp3 ini Anda tidak perlu menginstal aplikasi dan perangkat lunak apa pun di
+                    perangkat Anda.
+                </p>
+
+                <h3 class="text-xl mt-6 mb-3">Cara Menggunakan MP3Juice</h3>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li>Cari lagu atau tempel URL YouTube di kotak pencarian</li>
+                    <li>Klik tombol pencarian untuk menampilkan hasil</li>
+                    <li>Pilih kualitas audio yang Anda inginkan</li>
+                    <li>Klik tombol unduh dan nikmati musik Anda</li>
+                </ol>
+
+                <h3 class="text-xl mt-6 mb-3">Keuntungan MP3Juice</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>Tidak perlu registrasi atau login</li>
+                    <li>Tanpa batasan unduhan</li>
+                    <li>Tidak ada iklan yang mengganggu</li>
+                    <li>Antarmuka yang mudah digunakan</li>
+                    <li>Dukungan multi-platform</li>
+                </ul>
+            </div>
+        </article>
+
+        <!-- Trending Songs -->
+        <section class="mt-16 max-w-3xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold">Trending Saat Ini</h2>
+                <a href="#" class="text-primary-600 dark:text-primary-400 hover:underline">Lihat Semua</a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 group">
+                    <div class="h-40 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                        <img src="https://picsum.photos/400/320" alt="Song cover" class="w-full h-full object-cover" />
+                        <div
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div
+                                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium truncate">Popular Song Title</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Artist Name</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 group">
+                    <div class="h-40 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                        <img src="https://picsum.photos/400/320" alt="Song cover" class="w-full h-full object-cover" />
+                        <div
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div
+                                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium truncate">Another Hit Song</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Famous Artist</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 group">
+                    <div class="h-40 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                        <img src="https://picsum.photos/400/320" alt="Song cover" class="w-full h-full object-cover" />
+                        <div
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div
+                                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium truncate">Top Chart Music</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Popular Band</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 group">
+                    <div class="h-40 bg-gray-200 dark:bg-gray-700 relative overflow-hidden">
+                        <img src="https://picsum.photos/400/320" alt="Song cover" class="w-full h-full object-cover" />
+                        <div
+                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <div
+                                class="w-12 h-12 rounded-full bg-primary-600 text-white flex items-center justify-center">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium truncate">Latest Trending Song</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">New Artist</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 max-w-4xl mx-auto">
+                <div>
+                    <h3 class="text-lg font-bold mb-4">MP3Juice</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm">
+                        Platform terbaik untuk mengunduh musik MP3 berkualitas tinggi secara gratis dan cepat tanpa
+                        batasan.
+                    </p>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Navigasi</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Beranda</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Trending</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Koleksi</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Kontak</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Tautan Terkait</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">FAQ</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">DMCA</a>
+                        </li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Tentang
+                                Kami</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Blog</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- <div>
+                    <h3 class="text-lg font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Ketentuan
+                                Layanan</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Kebijakan
+                                Privasi</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Hak
+                                Cipta</a></li>
+                        <li><a href="#"
+                                class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Lisensi</a>
+                        </li>
+                    </ul>
+                </div> -->
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
+                <div class="flex justify-center space-x-4 mb-4">
+                    <a href="#" class="text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary-600 dark:hover:text-primary-400">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </div>
+
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    © 2025 MP3Juice. Semua Hak Dilindungi.
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('search-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        document.getElementById('search-button').addEventListener('click', performSearch);
+
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            const resultsContainer = document.getElementById('search-results');
+
+            if (!query) return;
+
+            fetch(`http://154.26.131.207:3000/api/search?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log('Response:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data) || data.length === 0) {
+                        resultsContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Tidak ada hasil ditemukan.</p>';
+                        resultsContainer.classList.remove('hidden');
+                        return;
+                    }
+
+                    resultsContainer.innerHTML = data.map(video => `
+                        <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700 mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-music text-gray-500 dark:text-gray-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium">${video.title}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">${video.channel} - ${video.duration_raw}</p>
+                                    <p class="text-xs text-gray-400">${video.views} • ${video.publishedAt}</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button
+                                    onclick="window.open('https://youtube.com/watch?v=${video.videoId}', '_blank')"
+                                    class="p-2 rounded-md bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button
+                                    class="p-2 rounded-md bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white transition">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    resultsContainer.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error fetching search results:', error);
+                    resultsContainer.innerHTML = '<p class="text-red-500">Gagal mengambil data pencarian.</p>';
+                    resultsContainer.classList.remove('hidden');
+                });
+        }
+    </script>
+</body>
+
+</html>

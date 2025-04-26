@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAFABAND - Download Lagu MP3 Gratis Terlengkap, Gudang Lagu Terbaru</title>
+    <meta name="description" content="STAFABAND adalah tempat terbaik untuk download lagu MP3 gratis. Temukan gudang lagu terlengkap dengan lagu terbaru dan terpopuler. Unduh musik favoritmu sekarang!">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Dark mode scrollbar */
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Audio player styling */
+        .audio-player {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-bar {
+            cursor: pointer;
+            transition: height 0.1s ease;
+        }
+        
+        .progress-bar:hover {
+            height: 8px;
+        }
+        
+        .song-item {
+            transition: all 0.2s ease;
+        }
+        
+        .song-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .mobile-player {
+            transition: bottom 0.3s ease;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .playing-animation {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen transition-colors duration-300 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md transition-colors duration-300">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="text-blue-600 dark:text-blue-400">
+                        <i class="fas fa-music text-2xl"></i>
+                    </div>
+                    <div class="font-bold text-xl md:text-2xl">STAFA<span class="text-blue-600 dark:text-blue-400">BAND</span></div>
+                </div>
+                
+                <!-- Search Bar - Desktop -->
+                <div class="hidden md:flex flex-1 mx-8">
+                    <div class="relative w-full">
+                        <input type="text" placeholder="Cari lagu, artis, atau album..." 
+                               class="w-full py-2 pl-4 pr-10 rounded-full bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+                        <button class="absolute right-3 top-2 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Right Navigation -->
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-300"></i>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Bar - Mobile -->
+            <div class="mt-3 md:hidden">
+                <div class="relative">
+                    <input type="text" placeholder="Cari lagu, artis, atau album..." 
+                           class="w-full py-2 pl-4 pr-10 rounded-full bg-gray-100 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+                    <button class="absolute right-3 top-2 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white dark:bg-gray-800 shadow-md transition-all duration-300">
+        <nav class="container mx-auto px-4 py-3">
+            <ul class="space-y-2">
+                <li><a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300">Home</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300">Top Charts</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300">Genres</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300">Artists</a></li>
+                <li><a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300">Albums</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="container mx-auto px-4 py-12 md:py-24">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-3xl md:text-5xl font-bold mb-6">Download Lagu MP3 Gratis Terlengkap</h1>
+                <p class="text-lg md:text-xl mb-8 opacity-90">Temukan dan unduh jutaan lagu favorit Anda dengan kualitas terbaik. Gudang lagu terlengkap, update setiap hari!</p>
+                
+                <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center">
+                    <a href="#trending" class="bg-white text-blue-600 hover:bg-gray-100 px-6 py-3 rounded-full font-medium transition-colors duration-300 flex items-center justify-center">
+                        <i class="fas fa-fire mr-2"></i> Trending Now
+                    </a>
+                    <a href="#genres" class="bg-blue-500 bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-full font-medium transition-colors duration-300 flex items-center justify-center">
+                        <i class="fas fa-th-large mr-2"></i> Browse Genres
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Wave Effect -->
+        <div class="absolute bottom-0 left-0 right-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120">
+                <path fill="#ffffff" fill-opacity="1" d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z" class="transition-colors duration-300 dark:fill-gray-900"></path>
+            </svg>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Trending Section -->
+        <section id="trending" class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold">Trending Now</h2>
+                <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline">View All</a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Song Card 1 -->
+                <div class="song-item bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="relative">
+                        <img src="/api/placeholder/400/200" alt="Song Thumbnail" class="w-full h-40 object-cover">
+                        <button class="play-button absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity duration-300" data-song="1">
+                            <i class="fas fa-play text-white text-3xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Heat Waves</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Glass Animals</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">04:00</span>
+                            </div>
+                            <button class="download-button bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 transition-colors duration-300">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Song Card 2 -->
+                <div class="song-item bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="relative">
+                        <img src="/api/placeholder/400/200" alt="Song Thumbnail" class="w-full h-40 object-cover">
+                        <button class="play-button absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity duration-300" data-song="2">
+                            <i class="fas fa-play text-white text-3xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Stay</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">The Kid LAROI, Justin Bieber</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">03:45</span>
+                            </div>
+                            <button class="download-button bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 transition-colors duration-300">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Song Card 3 -->
+                <div class="song-item bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+                    <div class="relative">
+                        <img src="/api/placeholder/400/200" alt="Song Thumbnail" class="w-full h-40 object-cover">
+                        <button class="play-button absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition-opacity duration-300" data-song="3">
+                            <i class="fas fa-play text-white text-3xl"></i>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Easy On Me</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-3">Adele</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">03:30</span>
+                            </div>
+                            <button class="download-button bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 transition-colors duration-300">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Latest Releases Section -->
+        <section class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl md:text-3xl font-bold">Latest Releases</h2>
+                <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline">View All</a>
+            </div>
+            
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <!-- Song 1 -->
+                    <li class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <div class="flex items-center p-4">
+                            <div class="w-12 h-12 shrink-0">
+                                <img src="/api/placeholder/100/100" alt="Song" class="w-full h-full object-cover rounded">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-semibold">Shivers</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Ed Sheeran</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="play-button mr-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" data-song="4">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">03:27</span>
+                                <button class="download-button text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <!-- Song 2 -->
+                    <li class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <div class="flex items-center p-4">
+                            <div class="w-12 h-12 shrink-0">
+                                <img src="/api/placeholder/100/100" alt="Song" class="w-full h-full object-cover rounded">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-semibold">INDUSTRY BABY</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Lil Nas X, Jack Harlow</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="play-button mr-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" data-song="5">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">03:55</span>
+                                <button class="download-button text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <!-- Song 3 -->
+                    <li class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <div class="flex items-center p-4">
+                            <div class="w-12 h-12 shrink-0">
+                                <img src="/api/placeholder/100/100" alt="Song" class="w-full h-full object-cover rounded">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-semibold">Happier Than Ever</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Billie Eilish</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="play-button mr-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" data-song="6">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">04:58</span>
+                                <button class="download-button text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <!-- Song 4 -->
+                    <li class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <div class="flex items-center p-4">
+                            <div class="w-12 h-12 shrink-0">
+                                <img src="/api/placeholder/100/100" alt="Song" class="w-full h-full object-cover rounded">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-semibold">Good 4 U</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Olivia Rodrigo</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="play-button mr-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" data-song="7">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">03:18</span>
+                                <button class="download-button text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <!-- Song 5 -->
+                    <li class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <div class="flex items-center p-4">
+                            <div class="w-12 h-12 shrink-0">
+                                <img src="/api/placeholder/100/100" alt="Song" class="w-full h-full object-cover rounded">
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-semibold">Bad Habits</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Ed Sheeran</p>
+                            </div>
+                            <div class="flex items-center">
+                                <button class="play-button mr-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300" data-song="8">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">03:51</span>
+                                <button class="download-button text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Genres Section -->
+        <section id="genres" class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6">Explore By Genre</h2>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Genre 1 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-music text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Pop</h3>
+                </a>
+                
+                <!-- Genre 2 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-guitar text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Rock</h3>
+                </a>
+                
+                <!-- Genre 3 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-compact-disc text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Hip Hop</h3>
+                </a>
+                
+                <!-- Genre 4 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-green-500 to-green-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-record-vinyl text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Dangdut</h3>
+                </a>
+                
+                <!-- Genre 5 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-microphone-alt text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">K-Pop</h3>
+                </a>
+                
+                <!-- Genre 6 -->
+                <a href="#" class="genre-card bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl p-4 text-white text-center transition transform hover:scale-105 duration-300">
+                    <div class="mb-2">
+                        <i class="fas fa-pray text-2xl"></i>
+                    </div>
+                    <h3 class="font-semibold">Religi</h3>
+                </a>
+            </div>
+        </section>
+        
+        <!-- Download Guide Section -->
+        <section class="mb-12">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">Cara Download Lagu MP3 Gratis</h2>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Step 1 -->
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mb-4">
+                                <i class="fas fa-search text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Cari Lagu</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Gunakan fitur pencarian untuk menemukan lagu favorit Anda.</p>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mb-4">
+                                <i class="fas fa-hand-pointer text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Pilih Lagu</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Klik pada judul lagu atau tombol download yang tersedia.</p>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mb-4">
+                                <i class="fas fa-download text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Mulai Download</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Klik tombol "Download MP3" untuk memulai proses pengunduhan.</p>
+                        </div>
+                        
+                        <!-- Step 4 -->
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 mb-4">
+                                <i class="fas fa-headphones text-xl"></i>
+                            </div>
+                            <h3 class="font-semibold mb-2">Nikmati Musik</h3>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm">Setelah selesai, nikmati lagu MP3 favorit Anda kapan saja.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Logo & About -->
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="text-blue-400">
+                            <i class="fas fa-music text-2xl"></i>
+                        </div>
+                        <div class="font-bold text-xl">STAFA<span class="text-blue-400">BAND</span></div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Stafaband hadir sebagai solusi terbaik bagi Anda yang ingin download lagu MP3 gratis dengan mudah dan cepat.</p>
+                    <div class="flex space-x-4">
